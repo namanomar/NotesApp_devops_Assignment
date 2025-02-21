@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongodb_database
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: mydb
+
+  backend:
+    build: ./backend
+    container_name: backend-service
+    restart: always
+    depends_on:
+      - mongodb
+    ports:
+      - "5000:5000"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/notesapp
+      PORT: 5000
+
+  frontend:
+    build: ./frontend
+    container_name: frontend-service
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "8080:8081"
+    environment:
+      REACT_APP_BACKEND_URL: "http://backend:5000"
+    
+volumes:
+  mongo_data:
